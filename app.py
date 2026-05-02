@@ -95,22 +95,34 @@ def inject_user():
 # ---------------------------------------------------------------------------
 # Routes — your S3 static site
 #
-# The home page serves whatever you have in S3_content/. Populate this folder
-# by running:
+# Your S3 site lives at /site/. Populate the S3_content/ folder by running:
 #   aws s3 sync s3://<your-bucket>/ S3_content/
-# from the repo root. Flask serves index.html as the home page; any other
-# file in the folder is reachable at its path (e.g., S3_content/about.html
-# becomes /about.html). Routes defined below — login, register, etc. —
-# take priority over the catch-all and are Flask-rendered, not static.
+# from the repo root. Then click "My Site" in the navbar.
+#
+# The home page is Flask-rendered and acts as the entry point: it has the
+# navbar (Login/Register/About/My Site) and a brief landing message.
 # ---------------------------------------------------------------------------
 
 @app.route("/")
 def home():
+    return render_template("home.html")
+
+
+@app.route("/site/")
+def site_home():
     index_path = S3_CONTENT_DIR / "index.html"
     if not index_path.exists():
         # Friendly placeholder when the student hasn't synced yet.
         return render_template("placeholder.html"), 200
     return send_from_directory(S3_CONTENT_DIR, "index.html")
+
+
+@app.route("/site/<path:filename>")
+def serve_s3_content(filename):
+    file_path = S3_CONTENT_DIR / filename
+    if not file_path.exists() or not file_path.is_file():
+        abort(404)
+    return send_from_directory(S3_CONTENT_DIR, filename)
 
 
 # ---------------------------------------------------------------------------
@@ -184,22 +196,6 @@ def about():
     # Each team replaces this content with their own About page (see
     # the assignment instructions in README.md).
     return render_template("about.html")
-
-
-# ---------------------------------------------------------------------------
-# Routes — catch-all for everything else in S3_content/
-#
-# This MUST be defined last. Flask matches routes in registration order;
-# defining /<path:filename> before /login would intercept /login as a
-# request for the file "login" inside S3_content/.
-# ---------------------------------------------------------------------------
-
-@app.route("/<path:filename>")
-def serve_s3_content(filename):
-    file_path = S3_CONTENT_DIR / filename
-    if not file_path.exists() or not file_path.is_file():
-        abort(404)
-    return send_from_directory(S3_CONTENT_DIR, filename)
 
 
 # ---------------------------------------------------------------------------

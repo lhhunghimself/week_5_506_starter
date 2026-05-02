@@ -64,14 +64,15 @@ contracts/             Empty for Week 5; populated next week
 
 | Route | Served by | What |
 |---|---|---|
-| `/` | `S3_content/index.html` | Your S3 site's home page |
-| `/<anything>.html` (or .png, .css, ...) | `S3_content/<file>` | Any other file from your bucket |
+| `/` | `templates/home.html` | Flask-rendered landing page with navbar (links to /site/, /about, /login, /register) |
+| `/site/` | `S3_content/index.html` | Your S3 site's home page |
+| `/site/<anything>` | `S3_content/<file>` | Any other file from your bucket (CSS, JS, images, nested folders) |
 | `/login` | `templates/login.html` | Flask-rendered login form |
 | `/register` | `templates/register.html` | Flask-rendered register form |
 | `/logout` | redirect | POST-only; clears session |
 | `/about` | `templates/about.html` | Flask-rendered about page (your team replaces) |
 
-The Flask routes (`/login`, `/register`, `/logout`, `/about`) take priority over the S3 catch-all. If you have a `S3_content/about.html`, it won't be reachable — Flask's `/about` wins. That's intentional.
+The Flask-rendered pages all share `templates/base.html`, which gives them a navbar with "My Site," "About," "Login/Register" or "Hello, *username* / Log out." Click "My Site" to view your synced S3 content.
 
 ## The assignment in one paragraph
 
